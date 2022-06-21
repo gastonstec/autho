@@ -1,0 +1,6 @@
+* @kueski-dev/research-and-discovery
+
+# Review of devops team if change workflows
+.github/workflows @kueski-dev/devops
+.terraform @kueski-dev/devops
+.k8s @kueski-dev/devops

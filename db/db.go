@@ -1,20 +1,21 @@
 // Copyright Kueski. All rights reserved.
 // Use of this source code is not licensed
 
-// Package db provides database connection services
+// Package provides database connection services
 package db
 
 import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/gastonstec/autho/gojlogger"
-	"github.com/gastonstec/autho/config"
+	"github.com/kueski-dev/paymentology-paymethods/helpers"
+	logger "github.com/kueski-dev/paymentology-paymethods/helpers/logger"
+	"github.com/kueski-dev/paymentology-paymethods/configs"
 )
 
-// Connection pool
-var DBRead *pgxpool.Pool
-var DBWrite *pgxpool.Pool
+// Connection pools
+var DBRead *pgxpool.Pool		// read pool
+var DBWrite *pgxpool.Pool		// write pool
 
 
 // Opens database connections pools
@@ -22,29 +23,29 @@ func OpenDB() error {
 	var err error
 
 	// create read connection
-	DBRead, err = pgxpool.Connect(context.Background(), config.ConnStrRead)
+	DBRead, err = pgxpool.Connect(context.Background(), configs.ConnStrRead)
 	if err != nil {
-		return err
+		return fmt.Errorf(helpers.GetFunctionName() + "- error opening DBRead connection %s", err.Error())
 	}
 	err = checkConnection(DBRead)
 	if err != nil {
-		return err
+		return fmt.Errorf(helpers.GetFunctionName() + "- error testing DBRead connection %s", err.Error())
 	}
 
 	// create read-write connection
-	DBWrite, err = pgxpool.Connect(context.Background(), config.ConnStrWrite)
+	DBWrite, err = pgxpool.Connect(context.Background(), configs.ConnStrWrite)
 	if err != nil {
-		return err
+		return fmt.Errorf(helpers.GetFunctionName() + "- error opening DBWrite connection %s", err.Error())
 	}
 	err = checkConnection(DBWrite)
 	if err != nil {
-		return err
+		return fmt.Errorf(helpers.GetFunctionName() + "- error testing DBWrite connection %s", err.Error())
 	}
 
 	return nil
 }
 
-// Function checkConnection test a connection and log the result
+// Test a connection and logs the result
 func checkConnection(dbconn *pgxpool.Pool) error {
 	var version, dbname, server, port string
 	var err error
@@ -58,7 +59,7 @@ func checkConnection(dbconn *pgxpool.Pool) error {
 	}
 	
 	// log database info
-	gojlogger.LogInfo(fmt.Sprintf("Connected to dbname=%s version=%s on server=%s port=%s with user=%s",
+	logger.LogInfo(fmt.Sprintf("Connected to dbname=%s version=%s on server=%s port=%s with user=%s",
 					dbname, version, server, port, dbconn.Config().ConnConfig.User))
 
 	return nil
@@ -69,5 +70,5 @@ func checkConnection(dbconn *pgxpool.Pool) error {
 func CloseDB() {
 	DBRead.Close()
 	DBWrite.Close()
-	gojlogger.LogInfo("Database connections has been closed")
+	logger.LogInfo("Database connections has been closed")
 }

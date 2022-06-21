@@ -1,36 +1,46 @@
+// Copyright Kueski. All rights reserved.
+// Use of this source code is not licensed
+
+// Package handles application routes
 package routes
 
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gastonstec/autho/utils"
-	"github.com/gastonstec/autho/authorizer"
-	"github.com/gastonstec/autho/routes/handlers"
+	"github.com/kueski-dev/paymentology-paymethods/helpers"
+	logger "github.com/kueski-dev/paymentology-paymethods/helpers/logger"
+	"github.com/kueski-dev/paymentology-paymethods/handlers"
 )
 
 const CANNOT_SET_ROUTE = "%s: cannot set route"
 
 // func InitRoutes initializes the application routes
-func InitRoutes(app *fiber.App) error {
+func Set(app *fiber.App) error {
 	var fr fiber.Router
 
+	logger.LogInfo("Starting setting routes")
+
+
+	// Probe route
 	// Route that gets the service information
-	fr = app.Get("/authorizer/api/v1/admin/about", handlers.AdminAbout)
+	fr = app.Get("/", handlers.Healthcheck)
 	if fr == nil{
-		return fmt.Errorf(CANNOT_SET_ROUTE, utils.GetFunctionName())
+		return fmt.Errorf(CANNOT_SET_ROUTE, helpers.GetFunctionName())
 	}
 
-	// Route that get event(s)
-	fr = app.Get("/authorizer/api/v1/auditlog/event/:event_id/:max_events", handlers.GetAuditEvents)
+	// Route that gets the service information
+	fr = app.Get("/authorizer/api/v1/admin/about", handlers.AdminAboutServiceHandler)
 	if fr == nil{
-		return fmt.Errorf(CANNOT_SET_ROUTE, utils.GetFunctionName())
+		return fmt.Errorf(CANNOT_SET_ROUTE, helpers.GetFunctionName())
 	}
 
 	// Route to the Paymentology authorizer
-	fr = app.Post("/authorizer/api/v1/pmtol/xmlrpc", authorizer.XMLRPCRouter)
+	fr = app.Post("/authorizer/api/v1/pmtol/xmlrpc", handlers.AuthorizerXMLHandler)
 	if fr == nil{
-		return fmt.Errorf(CANNOT_SET_ROUTE, utils.GetFunctionName())
+		return fmt.Errorf(CANNOT_SET_ROUTE, helpers.GetFunctionName())
 	}
+
+	logger.LogInfo("Routes has been set successfully")
 
 	return nil
 }

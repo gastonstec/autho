@@ -1,13 +1,12 @@
-module github.com/gastonstec/autho
+module github.com/kueski-dev/paymentology-paymethods
 
 go 1.18
 
-require (
-	clevergo.tech/jsend v1.1.3
-	github.com/hashicorp/go-memdb v1.3.3
-)
+require github.com/gofiber/fiber/v2 v2.34.0
 
 require (
+	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.12.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
@@ -16,16 +15,17 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.11.0 // indirect
 	github.com/jackc/puddle v1.2.1 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
 
 require (
+	clevergo.tech/jsend v1.1.3
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/gofiber/fiber/v2 v2.34.0 // indirect
+	github.com/aws/aws-sdk-go v1.44.27
 	github.com/google/uuid v1.3.0
-	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
-	github.com/hashicorp/golang-lru v0.5.4 // indirect
+	github.com/hashicorp/go-memdb v1.3.3
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/klauspost/compress v1.15.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect

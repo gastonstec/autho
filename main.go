@@ -1,7 +1,7 @@
 // Copyright Kueski. All rights reserved.
 // Use of this source code is not licensed
 
-// Package main handles the application start.
+// Handles the application start.
 package main
 
 import (
@@ -9,81 +9,83 @@ import (
 	"os"
 	"os/signal"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gastonstec/autho/utils"
-	"github.com/gastonstec/autho/authorizer"
-	"github.com/gastonstec/autho/gojlogger"
-	"github.com/gastonstec/autho/config"
-	"github.com/gastonstec/autho/db"
-	"github.com/gastonstec/autho/routes"
+	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/kueski-dev/paymentology-paymethods/helpers"
+	logger "github.com/kueski-dev/paymentology-paymethods/helpers/logger"
+	"github.com/kueski-dev/paymentology-paymethods/configs"
+	"github.com/kueski-dev/paymentology-paymethods/db"
+	"github.com/kueski-dev/paymentology-paymethods/services"
+	"github.com/kueski-dev/paymentology-paymethods/routes"
 )
 
 const SERVICE_NAME = "paymentology-paymethods"
+const OS_EXIT_CODE = 1 	// exit with error
 
 // Startup function
 func main() {
 	var err error
 
-	// Start logger
-	err = gojlogger.InitLogger("", SERVICE_NAME)
+	// start logger to os.Stdout
+	err = logger.Start("", SERVICE_NAME)
 	if err != nil {
-		log.Println("InitLogger error " + err.Error())
-		os.Exit(1) // exit with error
+		log.Println(err.Error())
+		os.Exit(OS_EXIT_CODE)
 	}
 
-	// Load config variables
-	err = config.LoadConfig()
+	// load config variables
+	err = configs.LoadConfig()
 	if err != nil {
-		gojlogger.LogError(utils.GetFunctionName() + ": " + err.Error())
-		os.Exit(1) // exit with error
+		logger.LogError(helpers.GetFunctionName() + "- " + err.Error())
+		os.Exit(OS_EXIT_CODE)
 	}
+
+	// log golang environment
+	logger.LogInfo(helpers.GetGolangEnv())
 
 	// open database connections
 	err = db.OpenDB()
 	if err != nil {
-		gojlogger.LogError(utils.GetFunctionName() + ": " + err.Error())
-		os.Exit(1) // exit with error
+		logger.LogError(helpers.GetFunctionName() + "- " + err.Error())
+		os.Exit(OS_EXIT_CODE)
 	}
 	defer db.CloseDB() // defer database closing
 
-	// Create fiber application
+	// create fiber application
 	app := fiber.New()
+	// setup fiber logger
+	app.Use(fiberlogger.New())
 
-	// Start paymethods/authorizer module
-	err = authorizer.StartAuthorizer(app)
+	// start services
+	err = services.Start()
 	if err != nil {
-		gojlogger.LogError(utils.GetFunctionName() + ": " + err.Error())
-		os.Exit(1) // exit with error
+		logger.LogError(helpers.GetFunctionName() + "- " + err.Error())
+		os.Exit(OS_EXIT_CODE)
 	}
 
 	// Init routes
-	gojlogger.LogInfo("Set routes...")
-	err = routes.InitRoutes(app)
+	err = routes.Set(app)
 	if err != nil {
-		gojlogger.LogError(utils.GetFunctionName() + ": " + err.Error())
-		os.Exit(1) // exit with error
+		logger.LogError(helpers.GetFunctionName() + "- " + err.Error())
+		os.Exit(OS_EXIT_CODE)
 	}
 
-	// log application environment
-	gojlogger.LogInfo(utils.GetOsEnv())
-	gojlogger.LogInfo(utils.GetGolangEnv())
-
-	// Set shutdown application signal catch
+	// set shutdown application signal catch
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		sd := <-c
-		gojlogger.LogInfo("Application shutdown started with " + sd.String() + " signal")
+		logger.LogInfo("Application shutdown started with " + sd.String() + " signal")
 		err = app.Shutdown()
-		gojlogger.LogInfo("Fiber application ended")
+		logger.LogInfo("Fiber application ended")
 	}()
 
-	// Start fiber server listening
-	err = app.Listen(config.FiberPort)
+	// start fiber server listening
+	err = app.Listen(configs.FiberPort)
 	if err != nil {
-		gojlogger.LogError(utils.GetFunctionName() + ": " + err.Error())
-		os.Exit(1) // exit with error
+		logger.LogError(helpers.GetFunctionName() + "- " + err.Error())
+		os.Exit(OS_EXIT_CODE)
 	}
 
-	// Cleanup tasks
-	gojlogger.LogInfo("Final cleanup tasks")
+	// cleanup tasks
+	logger.LogInfo("Perform final cleanup tasks")
 }

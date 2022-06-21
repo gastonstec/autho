@@ -15,25 +15,25 @@
 
 ### Transaction operations:
 >
-> **"W"** = For withdrawals or purchases. This operation **decrease** the available_balance and **increase** the blocked_balance.
+> **"W"** = For withdrawals or purchases. This operation **decrease** the balance
 >
-> **"D"** = For deposits or refunds. This operation **increase** the available_balance and **decrease** the blocked_balance.
+> **"D"** = For deposits or refunds. This operation **increase** the balance
 >
-> **"I"** = For information transactions. This operation doesn't affect the balances.
+> **"I"** = For information transactions
 >
 
 
 ### Paymentology transaction vs transaction operations:
 - Balance = NOT SUPPORTED, A ZERO BALANCE DEFAULT MESSAGE WILL BE SEND
-- Deduct = W
-- Deduct Adjustment = W
-- Deduct Reversal = D
-- LoadAdjustment = D
-- LoadAuth = ?
-- LoadAuthReversal = ?
-- LoadReversal = ?
+- Deduct = W over available_balance
+- Deduct Adjustment = W over available_balance
+- Deduct Reversal = D over blocked_balance
+- LoadAdjustment = I, W over blocked_balance
+- LoadAuth = I
+- LoadAuthReversal = I
+- LoadReversal = I, D over blocked_balance
 - Stop = I
-- AdministrativeMessage = I
+- AdministrativeMessage = NOT SUPPORTED, DO_NOT_HONOR MESSAGE WILL BE SEND
 - Balance = NOT SUPPORTED, A ZERO BALANCE DEFAULT MESSAGE WILL BE SEND
 - ValidatePIN = NOT SUPPORTED, AN INCORRECT PIN (-25) MESSAGE WILL BE SEND
 
